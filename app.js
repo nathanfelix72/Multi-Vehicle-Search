@@ -87,11 +87,13 @@ function findCheapestCombination(locationListings, vehicles) {
 
 function canFitVehiclesInCombination(listings, vehicles) {
 	const totalCombinedArea = listings.reduce(
-		(sum, listing) => sum + listing.length * listing.width, 0
+		(sum, listing) => sum + listing.length * listing.width,
+		0
 	);
 
 	const totalVehicleArea = vehicles.reduce(
-		(sum, v) => sum + v.length * 10 * v.quantity, 0
+		(sum, v) => sum + v.length * 10 * v.quantity,
+		0
 	);
 
 	if (totalCombinedArea < totalVehicleArea) {
@@ -148,4 +150,13 @@ app.post("/", (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {});
+
+// For local development
+if (process.env.NODE_ENV !== "production") {
+	app.listen(PORT, () => {
+		console.log(`Server running on port ${PORT}`);
+	});
+}
+
+// Export for Vercel
+module.exports = app;
