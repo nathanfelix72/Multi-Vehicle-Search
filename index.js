@@ -6,7 +6,9 @@ const app = express();
 app.use(express.json());
 
 // Load listings data
-const listings = JSON.parse(fs.readFileSync(path.join(__dirname, "listings.json"), "utf8"));
+const listings = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "listings.json"), "utf8")
+);
 console.log("Loaded", listings.length, "listings");
 
 function canFitVehicles(listing, vehicles) {
