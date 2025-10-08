@@ -1,24 +1,13 @@
+const express = require("express");
 const fs = require("fs");
 const path = require("path");
 
-function loadListings() {
-  try {
-    const listingsPath = path.join(__dirname, "listings.json");
-    console.log("Loading listings from:", listingsPath);
-    const data = JSON.parse(fs.readFileSync(listingsPath, "utf8"));
-    console.log("Successfully loaded", data.length, "listings");
-    return data;
-  } catch (error) {
-    console.error("Error loading listings:", error);
-    console.error("__dirname:", __dirname);
-    try {
-      console.error("Files in __dirname:", fs.readdirSync(__dirname));
-    } catch (e) {
-      console.error("Could not read __dirname");
-    }
-    return [];
-  }
-}
+const app = express();
+app.use(express.json());
+
+// Load listings data
+const listings = JSON.parse(fs.readFileSync(path.join(__dirname, "listings.json"), "utf8"));
+console.log("Loaded", listings.length, "listings");
 
 function canFitVehicles(listing, vehicles) {
   const vehicleWidth = 10;
@@ -130,30 +119,27 @@ function canFitVehiclesInCombination(listings, vehicles) {
   return true;
 }
 
-module.exports = (req, res) => {
+// CORS middleware
+app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
   if (req.method === "OPTIONS") {
     res.status(200).end();
     return;
   }
+  next();
+});
 
-  // Load listings for each request (serverless functions are stateless)
-  const listings = loadListings();
-
-  // Handle GET requests (when someone visits in browser)
-  if (req.method === "GET") {
-    res.setHeader("Content-Type", "text/html");
-    res.status(200).send(`
-      <html>
-        <body>
-          <h1>Multi-Vehicle Search API</h1>
-          <p>This API accepts POST requests with vehicle data.</p>
-          <p><a href="/api/test">Click here to test the API</a></p>
-          <h2>Example usage:</h2>
-          <pre>
+// GET route for info page
+app.get("/", (req, res) => {
+  res.send(`
+    <html>
+      <body>
+        <h1>Multi-Vehicle Search API</h1>
+        <p>This API accepts POST requests with vehicle data.</p>
+        <h2>Example usage:</h2>
+        <pre>
 curl -X POST "https://multi-vehicle-search.vercel.app/" \\
   -H "Content-Type: application/json" \\
   -d '[
@@ -162,19 +148,15 @@ curl -X POST "https://multi-vehicle-search.vercel.app/" \\
       "quantity": 1
     }
   ]'
-          </pre>
-          <p>Loaded ${listings.length} listings</p>
-        </body>
-      </html>
-    `);
-    return;
-  }
+        </pre>
+        <p>Loaded ${listings.length} listings</p>
+      </body>
+    </html>
+  `);
+});
 
-  if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
-  }
-
+// POST route for the main API
+app.post("/", (req, res) => {
   try {
     const vehicles = req.body;
 
@@ -210,9 +192,16 @@ curl -X POST "https://multi-vehicle-search.vercel.app/" \\
 
     results.sort((a, b) => a.total_price_in_cents - b.total_price_in_cents);
 
-    res.status(200).json(results);
+    res.json(results);
   } catch (error) {
     console.error("Error processing request:", error);
     res.status(500).json({ error: "Internal server error" });
   }
-};
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+module.exports = app;
