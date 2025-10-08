@@ -1,17 +1,24 @@
 const fs = require("fs");
 const path = require("path");
 
-let listings;
-try {
-  const listingsPath = path.join(process.cwd(), "listings.json");
-  console.log("Trying to load listings from:", listingsPath);
-  listings = JSON.parse(fs.readFileSync(listingsPath, "utf8"));
-  console.log("Successfully loaded", listings.length, "listings");
-} catch (error) {
-  console.error("Error loading listings:", error);
-  console.error("Current working directory:", process.cwd());
-  console.error("Available files:", fs.readdirSync(process.cwd()));
-  listings = [];
+function loadListings() {
+  try {
+    // Load from the same directory as this file
+    const listingsPath = path.join(__dirname, "listings.json");
+    console.log("Loading listings from:", listingsPath);
+    const data = JSON.parse(fs.readFileSync(listingsPath, "utf8"));
+    console.log("Successfully loaded", data.length, "listings");
+    return data;
+  } catch (error) {
+    console.error("Error loading listings:", error);
+    console.error("__dirname:", __dirname);
+    try {
+      console.error("Files in __dirname:", fs.readdirSync(__dirname));
+    } catch (e) {
+      console.error("Could not read __dirname");
+    }
+    return [];
+  }
 }
 
 function canFitVehicles(listing, vehicles) {
@@ -133,6 +140,9 @@ module.exports = (req, res) => {
     res.status(200).end();
     return;
   }
+
+  // Load listings for each request (serverless functions are stateless)
+  const listings = loadListings();
 
   // Handle GET requests (when someone visits in browser)
   if (req.method === "GET") {

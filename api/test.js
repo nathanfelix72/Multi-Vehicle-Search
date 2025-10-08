@@ -1,7 +1,7 @@
 module.exports = (req, res) => {
   // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Content-Type', 'text/html');
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Content-Type", "text/html");
 
   const html = `
 <!DOCTYPE html>
