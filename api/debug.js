@@ -2,8 +2,8 @@ const fs = require("fs");
 const path = require("path");
 
 module.exports = (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Content-Type', 'application/json');
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Content-Type", "application/json");
 
   try {
     const debugInfo = {
@@ -12,7 +12,7 @@ module.exports = (req, res) => {
       "files in __dirname": [],
       "files in process.cwd()": [],
       "listings file exists": false,
-      "listings count": 0
+      "listings count": 0,
     };
 
     try {
