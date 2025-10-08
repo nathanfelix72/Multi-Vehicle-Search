@@ -4,9 +4,13 @@ const path = require("path");
 let listings;
 try {
   const listingsPath = path.join(process.cwd(), "listings.json");
+  console.log("Trying to load listings from:", listingsPath);
   listings = JSON.parse(fs.readFileSync(listingsPath, "utf8"));
+  console.log("Successfully loaded", listings.length, "listings");
 } catch (error) {
   console.error("Error loading listings:", error);
+  console.error("Current working directory:", process.cwd());
+  console.error("Available files:", fs.readdirSync(process.cwd()));
   listings = [];
 }
 
@@ -122,11 +126,38 @@ function canFitVehiclesInCombination(listings, vehicles) {
 
 module.exports = (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") {
     res.status(200).end();
+    return;
+  }
+
+  // Handle GET requests (when someone visits in browser)
+  if (req.method === "GET") {
+    res.setHeader("Content-Type", "text/html");
+    res.status(200).send(`
+      <html>
+        <body>
+          <h1>Multi-Vehicle Search API</h1>
+          <p>This API accepts POST requests with vehicle data.</p>
+          <p><a href="/test">Click here to test the API</a></p>
+          <h2>Example usage:</h2>
+          <pre>
+curl -X POST "https://multi-vehicle-search.vercel.app/" \\
+  -H "Content-Type: application/json" \\
+  -d '[
+    {
+      "length": 10,
+      "quantity": 1
+    }
+  ]'
+          </pre>
+          <p>Loaded ${listings.length} listings</p>
+        </body>
+      </html>
+    `);
     return;
   }
 
