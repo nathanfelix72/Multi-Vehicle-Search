@@ -2,14 +2,8 @@
   "name": "multi-vehicle-search",
   "version": "1.0.0",
   "description": "API for searching vehicle storage locations",
-  "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "node app.js",
     "build": "echo 'No build step required'"
-  },
-  "dependencies": {
-    "express": "^4.18.2"
   },
   "engines": {
     "node": ">=18.x"
